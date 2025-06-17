@@ -1,6 +1,6 @@
 "use client"
 
-import { useState } from "react"
+import { useState, useEffect } from "react"
 import { Button } from "@/components/ui/button"
 import { Input } from "@/components/ui/input"
 import { Label } from "@/components/ui/label"
@@ -9,12 +9,47 @@ import { Textarea } from "@/components/ui/textarea"
 import { Loader2, Sparkles, ShoppingCart } from "lucide-react"
 import { generateProductCard, type ProductData } from "./actions"
 
+const loadingMessages = [
+  "Собираем пиксели в картинку... 🎨",
+  "Смешиваем краски на палитре... 🎭",
+  "Подбираем идеальные слова... ✍️",
+  "Консультируемся с шеф-поваром... 👨‍🍳",
+  "Фотографируем под правильным углом... 📸",
+  "Настраиваем студийное освещение... 💡",
+  "Придумываем цепляющее название... 🤔",
+  "Считаем справедливую цену... 💰",
+  "Добавляем щепотку магии... ✨",
+  "Проверяем на вкус и цвет... 👅",
+  "Упаковываем в красивую обертку... 🎁",
+  "Ищем вдохновение в облаках... ☁️",
+  "Спрашиваем мнение у кота... 🐱",
+  "Полируем до блеска... ✨",
+  "Добавляем последние штрихи... 🖌️",
+]
+
 export default function ProductCardGenerator() {
   const [productDescription, setProductDescription] = useState("")
   const [apiKey, setApiKey] = useState("")
   const [isGenerating, setIsGenerating] = useState(false)
   const [productData, setProductData] = useState<ProductData | null>(null)
   const [error, setError] = useState<string | null>(null)
+  const [currentMessageIndex, setCurrentMessageIndex] = useState(0)
+
+  useEffect(() => {
+    let interval: NodeJS.Timeout
+
+    if (isGenerating) {
+      interval = setInterval(() => {
+        setCurrentMessageIndex((prev) => (prev + 1) % loadingMessages.length)
+      }, 2000) // Меняем сообщение каждые 2 секунды
+    }
+
+    return () => {
+      if (interval) {
+        clearInterval(interval)
+      }
+    }
+  }, [isGenerating])
 
   const handleGenerate = async () => {
     if (!productDescription.trim() || !apiKey.trim()) {
@@ -111,6 +146,60 @@ export default function ProductCardGenerator() {
             </Button>
           </CardContent>
         </Card>
+
+        {/* Loading Product Card */}
+        {isGenerating && (
+          <Card className="shadow-xl overflow-hidden animate-pulse">
+            <div className="md:flex">
+              {/* Loading Image */}
+              <div className="md:w-1/2 relative bg-gradient-to-br from-purple-100 to-pink-100">
+                <div className="w-full h-64 md:h-full flex items-center justify-center">
+                  <div className="text-center space-y-4">
+                    <div className="w-16 h-16 mx-auto bg-gradient-to-r from-purple-400 to-pink-400 rounded-full flex items-center justify-center animate-spin">
+                      <Sparkles className="w-8 h-8 text-white" />
+                    </div>
+                    <div className="space-y-2">
+                      <div className="h-4 bg-gray-200 rounded w-32 mx-auto animate-pulse"></div>
+                      <div className="h-3 bg-gray-200 rounded w-24 mx-auto animate-pulse"></div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+
+              {/* Loading Details */}
+              <div className="md:w-1/2 p-6 flex flex-col justify-between">
+                <div className="space-y-4">
+                  <div className="text-center">
+                    <div className="text-lg font-medium text-purple-600 mb-4 transition-all duration-500 ease-in-out">
+                      {loadingMessages[currentMessageIndex]}
+                    </div>
+
+                    {/* Animated skeleton */}
+                    <div className="space-y-3">
+                      <div className="h-6 bg-gray-200 rounded w-3/4 mx-auto animate-pulse"></div>
+                      <div className="h-4 bg-gray-200 rounded w-full animate-pulse"></div>
+                      <div className="h-4 bg-gray-200 rounded w-5/6 mx-auto animate-pulse"></div>
+                      <div className="h-4 bg-gray-200 rounded w-4/5 mx-auto animate-pulse"></div>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center justify-between pt-4">
+                    <div className="h-8 bg-gray-200 rounded w-24 animate-pulse"></div>
+                    <div className="flex items-center gap-1">
+                      {[...Array(5)].map((_, i) => (
+                        <div key={i} className="w-5 h-5 bg-gray-200 rounded animate-pulse"></div>
+                      ))}
+                    </div>
+                  </div>
+                </div>
+
+                <div className="mt-6">
+                  <div className="h-12 bg-gray-200 rounded-lg animate-pulse"></div>
+                </div>
+              </div>
+            </div>
+          </Card>
+        )}
 
         {/* Generated Product Card */}
         {productData && (
